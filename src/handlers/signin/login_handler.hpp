@@ -50,7 +50,7 @@ userver::formats::json::Value LogInHandler::HandleRequestJsonThrow(
   const std::string user_name = request_json["name"].As<std::string>();
   const auto& [rows, user] = repository.GetByName(user_name);
 
-  std::string hashed_password = user.GetPasswd();
+  std::string hashed_password = std::move(user.GetPasswd());
   if(rows == 0 || !bcrypt::validatePassword(request_json["passwd"].As<std::string>(),hashed_password))
   {
     http_response.SetStatusOk();
