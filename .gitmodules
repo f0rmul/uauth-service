@@ -1,0 +1,6 @@
+[submodule "third_party/userver"]
+	path = third_party/userver
+	url = https://github.com/userver-framework/userver.git
+[submodule "third_party/Bcrypt.cpp"]
+	path = third_party/Bcrypt.cpp
+	url = https://github.com/hilch/Bcrypt.cpp.git

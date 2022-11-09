@@ -1,0 +1,67 @@
+# yaml
+components_manager:
+    coro_pool:
+        initial_size: 500             # Preallocate 500 coroutines at startup.
+        max_size: 1000                # Do not keep more than 1000 preallocated coroutines.
+
+    task_processors:                  # Task processor is an executor for coroutine tasks
+
+        main-task-processor:          # Make a task processor for CPU-bound couroutine tasks.
+            worker_threads: 4         # Process tasks in 4 threads.
+            thread_name: main-worker  # OS will show the threads of this task processor with 'main-worker' prefix.
+
+        fs-task-processor:            # Make a separate task processor for filesystem bound tasks.
+            thread_name: fs-worker
+            worker_threads: 4
+
+    default_task_processor: main-task-processor
+
+    components:             # Configuring components that were registered via component_list
+        server:
+            listener:                 # configuring the main listening socket...
+                port: 8080            # ...to listen on this port and...
+                task_processor: main-task-processor    # ...process incoming requests on this task processor.
+        logging:
+            fs-task-processor: fs-task-processor
+            loggers:
+                default:
+                    file_path: "../logs/logs.txt"
+                    level: WARNING
+                    overflow_behavior: discard  # Drop logs if the system is too busy to write them down.
+
+        tracer:                           # Component that helps to trace execution times and requests in logs.
+            service-name: uauth-service  # "You know. You all know exactly who I am. Say my name. " (c)
+
+        dynamic-config:                      # Dynamic config storage options, do nothing
+            fs-cache-path: ''
+
+        dynamic-config-fallbacks:            # Load options from file and push them into the dynamic config storage.
+            fallback-path: 	/home/f0rmull/Desktop/uauth-service/configs/dynamic_config_fallback.json
+
+        postgres-settings:
+            dbconnection: postgresql://postgres:Setload11@192.168.1.43:5432/postgres
+            blocking_task_processor: fs-task-processor
+            dns_resolver: async
+
+        testsuite-support:
+
+        dns-client:
+            fs-task-processor: fs-task-processor
+
+        sign-in-handler:
+            path: /login
+            method: GET,POST
+            log-level: WARNING
+            task_processor: main-task-processor
+        
+        sign-up-handler:
+            path: /register
+            method: GET,POST
+            log-level: WARNING
+            task_processor: main-task-processor
+
+        user-repository:
+            task_processor: main-task-processor
+        token-manager:
+            task_processor: main-task-processor
+        # handlers cfg here...
